@@ -1,5 +1,5 @@
 import { db } from '../firebase'
-import { addDoc, collection, getDocs, query, where } from 'firebase/firestore'
+import { addDoc, collection, getDocs, orderBy, query, where } from 'firebase/firestore'
 
 class AppointmentModel {
 
@@ -17,7 +17,7 @@ class AppointmentModel {
     }
 
     async getByPatientUuid(uuid) {
-        const q = query(collection(db, this.table), where("paciente_uuid", "==", uuid))
+        const q = query(collection(db, this.table), where("paciente_uuid", "==", uuid), orderBy("data"), orderBy("horario"))
         const data = await getDocs(q)
         const dataResult = data.docs.map((doc) => ({
             ...doc.data(),

@@ -212,6 +212,19 @@ class UserModel {
     }
 
     // Listener para recuperar todos os pacientes da base
+    getUserSnapshotByUuid(uuid) {
+        const q = query(collection(db, "usuario"), where("usuario_uuid", "==", uuid))
+        const userInfo = onSnapshot(q, (data) => {
+            const dataResult = data.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id
+            }))
+            return dataResult
+        })
+        return userInfo
+    }
+
+    // Listener para recuperar todos os pacientes da base
     getUsersSnapshot() {
         const q = query(collection(db, "usuario"), orderBy("criado_em"))
         const usersList = onSnapshot(q, (data) => {
@@ -234,7 +247,23 @@ class UserModel {
         }
     }
 
-
+    async mergeAllData(uuids, result) {
+        const queryUser = query(collection(db, "usuario"), where('uuid', 'in', uuids))
+        const docsUser = await getDocs(queryUser)
+        const dataUser = docsUser.docs.map((docUser) => ({
+            ...docUser.data()
+        }))
+        
+        let dataTemp = []
+        let merge = null
+        let fullData = []
+        dataUser.forEach((valueResultUser) => {
+            dataTemp[valueResultUser.uuid] = valueResultUser
+            merge = Object.assign(dataTemp[valueResultUser.uuid], result[valueResultUser.uuid])
+            fullData.push(merge)
+        })
+        return fullData
+    }
 }
 
 export default UserModel

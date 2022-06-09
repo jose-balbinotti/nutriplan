@@ -58,29 +58,14 @@ class NutritionistModel extends UserModel {
             id: doc.id
         }))
 
-        let result = []
+        let res = []
         let uuids = []
         dataNutri.forEach((value) => {
-            result[value.usuario_uuid] = value
+            res[value.usuario_uuid] = value
             uuids.push(value.usuario_uuid)
         })
         
-        const queryUser = query(collection(db, "usuario"), where('uuid', 'in', uuids))
-        const docsUser = await getDocs(queryUser)
-        const dataUser = docsUser.docs.map((docUser) => ({
-            ...docUser.data()
-        }))
-        
-        let dataTemp = []
-        let merge = null
-        let fullData = []
-        dataUser.forEach((valueResultUser) => {
-            dataTemp[valueResultUser.uuid] = valueResultUser
-            merge = Object.assign(dataTemp[valueResultUser.uuid], result[valueResultUser.uuid])
-            fullData.push(merge)
-        })
-
-        return fullData
+        return await this.mergeAllData(uuids, res)
     }
 
     async isNutritionist(uuid) {
